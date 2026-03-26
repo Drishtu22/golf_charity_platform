@@ -1,5 +1,4 @@
 const winston = require('winston');
-const path = require('path');
 
 const levels = {
   error: 0,
@@ -19,35 +18,35 @@ const colors = {
 
 winston.addColors(colors);
 
-const format = winston.format.combine(
+// ─── Console format (with color for dev, plain for prod) ──────────────────────
+const devFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
   winston.format.colorize({ all: true }),
-  winston.format.printf(({ timestamp, level, message, stack }) => {
-    return stack
+  winston.format.printf(({ timestamp, level, message, stack }) =>
+    stack
       ? `${timestamp} [${level}]: ${message}\n${stack}`
-      : `${timestamp} [${level}]: ${message}`;
-  })
+      : `${timestamp} [${level}]: ${message}`
+  )
 );
 
-const transports = [
-  new winston.transports.Console(),
-  new winston.transports.File({
-    filename: path.join('logs', 'error.log'),
-    level: 'error',
-    format: winston.format.uncolorize(),
-  }),
-  new winston.transports.File({
-    filename: path.join('logs', 'combined.log'),
-    format: winston.format.uncolorize(),
-  }),
-];
+const prodFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json() // structured JSON logs — readable in Vercel dashboard
+);
 
+// ─── IMPORTANT: No File transports — Vercel filesystem is read-only ───────────
+// Use Console only. View logs in: Vercel Dashboard → Deployment → Functions → Logs
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'development' ? 'debug' : 'warn',
   levels,
-  format,
-  transports,
+  format: process.env.NODE_ENV === 'production' ? prodFormat : devFormat,
+  transports: [
+    new winston.transports.Console(),
+    // ❌ DO NOT add File transports here — Vercel has no writable filesystem
+    // new winston.transports.File({ filename: 'logs/error.log' }), // crashes Vercel
+  ],
 });
 
 module.exports = logger;

@@ -28,7 +28,6 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
-// Add env FRONTEND_URL if set and not already listed
 if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
@@ -56,7 +55,6 @@ app.use((req, res, next) => {
 });
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
-// crossOriginResourcePolicy: false prevents helmet from stripping CORS headers
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
