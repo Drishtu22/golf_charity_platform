@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand: #22c55e;
+    --color-gold: #f59e0b;
+    --color-surface: #0a0a0a;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-white font-body antialiased;
+    background-color: #0a0a0a;
+  }
+
+  ::selection {
+    background-color: rgba(34, 197, 94, 0.3);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #22c55e; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
+           bg-brand-500 hover:bg-brand-400 text-white font-medium 
+           rounded-xl transition-all duration-200 
+           hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] 
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
+           border border-white/20 hover:border-white/40 text-white font-medium 
+           rounded-xl transition-all duration-200 bg-white/5 hover:bg-white/10
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
+           bg-gold-500 hover:bg-gold-400 text-black font-semibold 
+           rounded-xl transition-all duration-200 
+           hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] 
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .card {
+    @apply bg-surface-50 border border-white/10 rounded-2xl p-6;
+  }
+
+  .card-hover {
+    @apply card hover:border-brand-500/40 hover:bg-white/5 transition-all duration-200 cursor-pointer;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-50 border border-white/15 rounded-xl 
+           text-white placeholder-white/40 font-body
+           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50
+           transition-all duration-200 disabled:opacity-50;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-white/70 mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-green  { @apply badge bg-brand-500/20 text-brand-400; }
+  .badge-gold   { @apply badge bg-gold-500/20 text-gold-400; }
+  .badge-red    { @apply badge bg-red-500/20 text-red-400; }
+  .badge-gray   { @apply badge bg-white/10 text-white/60; }
+  .badge-blue   { @apply badge bg-blue-500/20 text-blue-400; }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl font-bold text-white leading-tight;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-white/60 leading-relaxed max-w-2xl;
+  }
+
+  .glow-green {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+  }
+
+  .divider {
+    @apply border-t border-white/10 my-8;
+  }
+
+  .stat-card {
+    @apply card flex flex-col gap-1;
+  }
+
+  .stat-value {
+    @apply text-3xl font-display font-bold text-white;
+  }
+
+  .stat-label {
+    @apply text-sm text-white/50;
+  }
+
+  .table-header {
+    @apply text-xs font-medium text-white/50 uppercase tracking-wider py-3 px-4 text-left;
+  }
+
+  .table-cell {
+    @apply py-3 px-4 text-sm text-white/80 border-t border-white/5;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent;
+  }
+
+  .bg-grid {
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+}
