@@ -3,7 +3,6 @@ require('express-async-errors');
 
 const express = require('express');
 const helmet = require('helmet');
-const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
@@ -21,23 +20,48 @@ const adminRoutes = require('./routes/admin.routes');
 const webhookRoutes = require('./routes/webhook.routes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// ─── CORS — must be FIRST before all other middleware ─────────────────────────
+const allowedOrigins = [
+  'https://golf-charity-frontend-ten.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+// Add env FRONTEND_URL if set and not already listed
+if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type,Authorization,X-Requested-With,Accept'
+  );
+
+  // Respond immediately to preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+});
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
-app.use(helmet());
-
-app.use(
-  cors({
-    origin: [process.env.FRONTEND_URL, 'http://localhost:5173'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+// crossOriginResourcePolicy: false prevents helmet from stripping CORS headers
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -60,7 +84,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Logging ──────────────────────────────────────────────────────────────────
-app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+}
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -89,9 +117,12 @@ app.use('*', (req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-});
+// ─── Start Server (local dev only — Vercel does NOT use app.listen) ───────────
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  });
+}
 
 module.exports = app;
