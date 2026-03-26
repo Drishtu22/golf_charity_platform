@@ -35,10 +35,28 @@ const changePasswordValidation = [
 
 // ─── Routes ────────────────────────────────────────────────────────────────────
 
+// Add debug middleware for this router
+router.use((req, res, next) => {
+  console.log(`[Auth Routes] ${req.method} ${req.path}`);
+  console.log('[Auth Routes] Headers:', req.headers);
+  console.log('[Auth Routes] Body:', { ...req.body, password: '[REDACTED]' });
+  next();
+});
+
 router.post('/register', registerValidation, validate, authController.register);
 router.post('/login', loginValidation, validate, authController.login);
 router.post('/refresh', authController.refreshToken);
 router.get('/me', authenticate, authController.getMe);
 router.patch('/change-password', authenticate, changePasswordValidation, validate, authController.changePassword);
+
+// Error handler for this router
+router.use((err, req, res, next) => {
+  console.error('[Auth Routes] Error:', err);
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error',
+    message: err.message
+  });
+});
 
 module.exports = router;
